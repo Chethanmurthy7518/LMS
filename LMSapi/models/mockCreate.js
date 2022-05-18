@@ -5,14 +5,14 @@ const createMockSchema = new mongoose.Schema({
         type:Number,
         required:true
     },
-    technologyName:{
+    technologies:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'technologies'
-    },
-    panel:{
+    }],
+    panel:[{
         type:String,
         required:true
-    },
+    }],
     dateTime:{
         type:String,
         required:true

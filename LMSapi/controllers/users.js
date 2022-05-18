@@ -78,7 +78,7 @@ const mentorRegister = async (req, res, next) => {
           console.log(skillsAsObject);
           for (let i = 0; i < skillsAsObject.length; i++) {
             const skillExist = await skillModel.findOne({
-              sName: skillsAsObject[i].sName.sName,
+              sName: skillsAsObject[i].sName,
             });
 
             if (skillExist) {
@@ -113,7 +113,7 @@ const mentorRegister = async (req, res, next) => {
               }
             } else {
               const skill = new skillModel({
-                sName: skillsAsObject[i].sName.sName,
+                sName: skillsAsObject[i].sName,
                 empId: mentorData._id,
               });
               try {
@@ -336,14 +336,14 @@ const userLogin = async (req, res, next) => {
           },
         });
       } else {
-        res.status(403).json({
+        res.json({
           error: true,
           message: "Invalid Password",
           data: null,
         });
       }
     } else if (mentorsData) {
-      const { mentorName, empId, emailId, role } = mentorsData;
+      const { mentorName, empId, emailId, role, passwordChanged } = mentorsData;
 
       //bcrypt comapre
       const isPasswordMatched = await bcrypt.compare(
@@ -363,6 +363,7 @@ const userLogin = async (req, res, next) => {
             empId,
             emailId,
             role,
+            passwordChanged,
             token,
           },
         });
@@ -1057,7 +1058,7 @@ const employeeDelete = async (req, res, next) => {
 const employeeRegisterApprove = async (req, res, next) => {
   console.log(req.body);
 
-  const { empId, approveStatus, batchName, batchId } = req.body;
+  const { empId, batchId } = req.body;
   try {
     const employeeData = await employeeDetailsModel.findOne({ empId: empId });
     const batch = await batchModel.findOne({ batchId: batchId });
@@ -1070,7 +1071,7 @@ const employeeRegisterApprove = async (req, res, next) => {
         },
         {
           $set: {
-            approveStatus,
+            approveStatus:'approve',
             batchName: batch.batchName,
             batchId: batch.batchId,
           },
@@ -1095,7 +1096,6 @@ const employeeRegisterApprove = async (req, res, next) => {
         message: "Employee Registration approved",
         data: {
           empId,
-          approveStatus,
         },
       });
     } else {
@@ -1113,7 +1113,7 @@ const employeeRegisterApprove = async (req, res, next) => {
 const employeeRegisterReject = async (req, res, next) => {
   console.log(req.body);
 
-  const { empId, approveStatus, reason } = req.body;
+  const { empId, reason } = req.body;
   try {
     const employeeData = await employeeDetailsModel.findOne({ empId: empId });
     console.log(employeeData);
@@ -1123,7 +1123,7 @@ const employeeRegisterReject = async (req, res, next) => {
       },
       {
         $set: {
-          approveStatus,
+          approveStatus:'reject'
         },
       }
     );
@@ -1131,7 +1131,7 @@ const employeeRegisterReject = async (req, res, next) => {
     const empr = new empRejectModel({
       empId,
       empName: employeeData.empName,
-      approveStatus,
+      approveStatus:'reject',
       reason,
     });
     const employeeRejectData = await empr.save();
@@ -1195,6 +1195,34 @@ const getEmployeeDetailsBasedOnEmpId = async (req, res, next) => {
   }
 };
 
+const getEmployeeDetailsBasedOnBatchId = async (req, res, next) => {
+  console.log(req.query);
+  const { batchId } = req.query;
+  try {
+    const employeeData = await employeeDetailsModel
+      .find({ batchId: batchId })
+      .populate(["educationDetails", "addressDetails", "experiance", "contact"])
+      .populate("technicalSkills", "skill")
+      .lean();
+    if(employeeData){
+      res.status(200).json({
+        error: false,
+        message: "Employee Getting Successfull",
+        data: employeeData,
+      });
+    }
+    else{
+      res.json({
+        error:true,
+        message:"Employees did not Found on Batch",
+        data:null
+      })
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   userLogin,
   mentorRegister,
@@ -1208,6 +1236,7 @@ module.exports = {
   employeeEdit,
   getAllEmployees,
   getEmployeeDetailsBasedOnEmpId,
+  getEmployeeDetailsBasedOnBatchId,
   getSkills,
 };
-41;
+

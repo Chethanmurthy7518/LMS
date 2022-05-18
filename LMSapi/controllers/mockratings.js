@@ -4,7 +4,7 @@ const employeeModel = require("../models/employeeDetails.js");
 const createMockModel = require("../models/mockCreate.js");
 const createMock = async (req, res, next) => {
   console.log(req.body);
-  const { mockNo, technologyName, panel, dateTime } = req.body;
+  const { mockNo, technologies, panel, dateTime } = req.body;
   try {
     const mocknumber = await createMockModel.findOne({ mockNo: mockNo });
     console.log(mocknumber);
@@ -15,29 +15,83 @@ const createMock = async (req, res, next) => {
         data: null,
       });
     } else {
-      const technology = await technologyModel.find({
-        technologyName: technologyName,
-      });
-      //  console.log(technology);
-      let technologyN = null;
-      technology.forEach((value) => {
-        technologyN = value;
-      });
-      console.log(technologyN);
       const mockc = new createMockModel({
         mockNo,
-        technologyName: technologyN._id,
+        technologies: [],
         panel,
         dateTime,
       });
 
       const createMockData = await mockc.save();
 
-      res.status(200).json({
-        error: false,
-        message: "Mock Created Successfull",
-        data: createMockData,
+      var technologyAsObject = [];
+      technologies.forEach((value) => {
+        technologyAsObject.push({
+          technologyName: value,
+        });
       });
+      console.log(technologyAsObject);
+      for (let i = 0; i < technologyAsObject.length; i++) {
+        const technologyExist = await technologyModel.findOne({
+          technologyName: technologyAsObject[i].technologyName,
+        });
+        if (technologyExist) {
+          try {
+            createMockModel.findOne({ _id: createMockData._id }, async (err, mockid) => {
+              if (mockid) {
+                mockid.technologies.push(technologyExist._id);
+                await mockid.save();
+
+                if (i === technologies.length - 1) {
+                  res.status(200).json({
+                    error: false,
+                    message: "Mock Created Successfull",
+                    data: createMockData,
+                  });
+                }
+              } else {
+                res.status(409).json({
+                  error: true,
+                  message: "Mock id did not found",
+                  data: null,
+                });
+              }
+            });
+          } catch (err) {
+            next(err);
+          }
+        } else {
+          const technology = new technologyModel({
+            technologyName: technologyAsObject[i].technologyName,
+          });
+          try {
+            const technologyData = await technology.save();
+            createMockModel.findOne({ _id: createMockData._id }, async (err, mockid) => {
+              if (mockid) {
+                mockid.technologies.push(technologyData._id);
+                await mockid.save();
+
+                if (i === technologies.length - 1) {
+                  res.status(200).json({
+                    error: false,
+                    message: "Mock Created Successfull",
+                    data: createMockData,
+                  });
+                }
+              } else {
+                res.status(409).json({
+                  error: true,
+                  message: "mock Id did not found",
+                  data: null,
+                });
+              }
+            });
+          } catch (err) {
+            next(err);
+          }
+        }
+      }
+
     }
   } catch (err) {
     next(err);
@@ -50,10 +104,10 @@ const getCreatedMock = async (req, res, next) => {
       .populate("technologyName")
       .lean();
     res.status(200).json({
-      error:false,
-      message:"Created mocks getting successfull",
-      data:createdMockData
-    })
+      error: false,
+      message: "Created mocks getting successfull",
+      data: createdMockData,
+    });
   } catch (err) {
     next(err);
   }
@@ -161,8 +215,8 @@ const getAllMockDetails = async (req, res, next) => {
 };
 
 const getMockDetailsBasedOnEmployee = async (req, res, next) => {
-  console.log(req.body);
-  const { empId } = req.body;
+  console.log(req.query);
+  const { empId } = req.query;
   try {
     const mockdata = await mockModel
       .findOne({ empId: empId })

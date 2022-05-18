@@ -51,7 +51,7 @@ const batchRegister = async (req, res, next) => {
       console.log(technologyAsObject);
       for (let i = 0; i < technologyAsObject.length; i++) {
         const technologyExist = await technologyModel.findOne({
-          technologyName: technologyAsObject[i].technologyName.technologyName,
+          technologyName: technologyAsObject[i].technologyName,
         });
         if (technologyExist) {
           try {
@@ -80,7 +80,7 @@ const batchRegister = async (req, res, next) => {
           }
         } else {
           const technology = new technologyModel({
-            technologyName: technologyAsObject[i].technologyName.technologyName,
+            technologyName: technologyAsObject[i].technologyName,
           });
           try {
             const technologyData = await technology.save();
@@ -128,6 +128,31 @@ const getAllbatches = async (req, res, next) => {
   }
 };
 
+const getBatchByEmpId = async (req,res,next)=>{
+  console.log(req.query);
+  try{
+    const {empId} = req.query
+    console.log(empId);
+    const batchData = await batchModel.find({empId}).populate(["technologies"]).lean();
+    if(batchData){
+      res.status(200).json({
+        error:false,
+        message:"Employee Batch Found",
+        data:batchData
+      })
+    }
+    else{
+      res.json({
+        error:true,
+        message:"Batch Id did not found",
+        data:null
+      })
+    }
+  }
+  catch(err){
+    next(err)
+  }
+}
 const getMentorBatch = async (req, res, next) => {
   console.log(req.body);
   const { empId } = req.body;
@@ -207,6 +232,7 @@ const batchEdit = async (req, res, next) => {
 module.exports = {
   batchRegister,
   getAllbatches,
+  getBatchByEmpId,
   getMentorBatch,
   deleteBatch,
   batchEdit,
