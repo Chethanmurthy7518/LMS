@@ -19,6 +19,11 @@ const mentorSchema = new mongoose.Schema({
       maxlength:30,
       required:true
   },
+  batchId:{
+    type:mongoose.Schema.Types.String,
+    ref:'batches'
+
+  },
   skills:[
       {
           type:mongoose.Schema.Types.ObjectId,

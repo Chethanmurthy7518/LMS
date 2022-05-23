@@ -6,8 +6,8 @@ const empTechSchema = new mongoose.Schema({
   }],
   skill: {
     type: String,
-    minlength: 5,
-    maxlength: 10,
+    minlength: 2,
+    maxlength: 50,
     required: true,
   },
   skillRating: {

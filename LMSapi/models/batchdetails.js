@@ -29,7 +29,7 @@ const batchSchema = new mongoose.Schema({
       ref:'technologies'
   }],
   startDate:{
-      type:String,
+      type:String,  
       required:true
   },
   endDate:{

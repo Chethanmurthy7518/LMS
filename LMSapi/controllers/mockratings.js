@@ -148,6 +148,7 @@ const mockRating = async (req, res, next) => {
         console.log("tech", techData);
         const mock = new mockModel({
           empId,
+          batchId:employeeExist.batchId,
           mockType,
           mockTakenBy,
           technology: techData._id,
@@ -167,6 +168,7 @@ const mockRating = async (req, res, next) => {
       } else {
         const mock = new mockModel({
           empId,
+          batchId:employeeExist.batchId,
           mockType,
           mockTakenBy,
           technology: technologyExist._id,
@@ -240,10 +242,33 @@ const getMockDetailsBasedOnEmployee = async (req, res, next) => {
   }
 };
 
+const getEmployeeWithMockDataWithBatchId = async (req,res,next)=>{
+  console.log(req.query);
+  const {batchId} = req.query
+  try{
+     const EmployeeData = await employeeModel.find({batchId}).lean()
+     console.log("Employees",EmployeeData);
+     const mockData = await mockModel.find({batchId}).lean()
+     console.log(EmployeeData);
+      // console.log("EmpId",empId);
+     res.json({
+       error:false,
+       message:"Employee Data with MockRating",
+       data:{
+        EmployeeData,
+        mockData
+       }
+     })
+  }
+  catch(err){
+    next(err)
+  }
+}
 module.exports = {
   createMock,
   getCreatedMock,
   mockRating,
   getAllMockDetails,
   getMockDetailsBasedOnEmployee,
+  getEmployeeWithMockDataWithBatchId,
 };

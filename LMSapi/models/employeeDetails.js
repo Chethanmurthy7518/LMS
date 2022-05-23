@@ -4,7 +4,7 @@ const empDetailsSchema = new mongoose.Schema({
   empId: {
     type: String,
     minlength: 5,
-    maxlength: 10,
+    maxlength: 20,
     required: true,
   },
   empName: {

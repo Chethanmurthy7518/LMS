@@ -20,13 +20,13 @@ const batchRegister = async (req, res, next) => {
 
   try {
     if (batchIdExist) {
-      res.status(409).json({
+      res.json({
         error: true,
         message: "Batch Alreday Exist",
         data: null,
       });
     } else {
-      console.log("Else Condition");
+      // console.log("Else Condition");
       const mentorId = await mentorsModel.findOne({ empId: empId });
       console.log(mentorId);
       const batch = new batchModel({
@@ -41,7 +41,14 @@ const batchRegister = async (req, res, next) => {
       });
 
       const batchData = await batch.save();
-
+      await mentorsModel.updateOne(
+        {
+          empId,  
+        },
+        {
+          batchId:batchId
+        }
+      )
       var technologyAsObject = [];
       technologies.forEach((value) => {
         technologyAsObject.push({

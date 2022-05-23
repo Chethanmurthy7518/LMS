@@ -18,4 +18,5 @@ router.post('/takeattendance',attendanceController.empAttendance)
 router.get('/getallattence',attendanceController.getAllEmployeeAttendance)
 router.get('/getemployeeattendance',attendanceController.getAttendanceBasedOnEmpId)
 router.get('/getbatchbyempid',batchController.getBatchByEmpId)
+router.get('/getemployeewithmockdata',mockController.getEmployeeWithMockDataWithBatchId)
 module.exports = router

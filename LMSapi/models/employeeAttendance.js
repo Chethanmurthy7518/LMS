@@ -18,11 +18,11 @@ const attendanceSchema = new mongoose.Schema({
       type: Boolean,
       default: true,
     },
-    date:{
-        type:Date,
-        default:Date.now()
-    }
+  },
+  date: {
+    type: Date,
+    default: Date.now(),
   },
 });
 
-module.exports = mongoose.model('employeeAttendance',attendanceSchema)
+module.exports = mongoose.model("employeeAttendance", attendanceSchema);

@@ -343,7 +343,7 @@ const userLogin = async (req, res, next) => {
         });
       }
     } else if (mentorsData) {
-      const { mentorName, empId, emailId, role, passwordChanged } = mentorsData;
+      const { mentorName, empId, emailId, role, passwordChanged,batchId } = mentorsData;
 
       //bcrypt comapre
       const isPasswordMatched = await bcrypt.compare(
@@ -363,12 +363,13 @@ const userLogin = async (req, res, next) => {
             empId,
             emailId,
             role,
+            batchId,
             passwordChanged,
             token,
           },
         });
       } else {
-        res.status(403).json({
+        res.json({
           error: true,
           message: "Password Incorrect",
           data: null,
@@ -376,7 +377,7 @@ const userLogin = async (req, res, next) => {
       }
     } else if (employeeData) {
       console.log(employeeData);
-      const { empName, empId, emailId, role, addressDetails, technicalSkills } =
+      const { empName, empId, emailId, role, addressDetails, technicalSkills,passwordChanged } =
         employeeData;
       const empStatus = await employeeDetailsModel.findOne({ empId: empId });
       console.log(empStatus);
@@ -398,6 +399,7 @@ const userLogin = async (req, res, next) => {
               empName,
               empId,
               emailId,
+              passwordChanged,
               role,
               token,
               addressDetails,
@@ -474,7 +476,7 @@ const employeeRegister = async (req, res, next) => {
   const empIdExist = await employeeDetailsModel.findOne({ empId: empId });
   try {
     if (empIdExist) {
-      res.status(409).json({
+      res.json({
         error: true,
         message: "Employee ID Alreday Exist",
         data: null,
@@ -567,13 +569,7 @@ const employeeRegister = async (req, res, next) => {
                     emp.educationDetails.push(empEducationData._id);
                     await emp.save();
 
-                    // if (i === educationDetails.length - 1) {
-                    //   res.status(200).json({
-                    //     error: false,
-                    //     message: "Employee Registration successfull",
-                    //     data: emp,
-                    //   });
-                    // }
+                    
                   } else {
                     res.json({
                       error: true,
@@ -611,13 +607,8 @@ const employeeRegister = async (req, res, next) => {
                     emp.addressDetails.push(empAddressData._id);
                     await emp.save();
 
-                    // if (i === educationDetails.length - 1) {
-                    //   res.status(200).json({
-                    //     error: false,
-                    //     message: "Employee Registration successfull",
-                    //     data: emp,
-                    //   });
-                    // }
+                    
+                    
                   } else {
                     res.json({
                       error: true,
@@ -649,17 +640,9 @@ const employeeRegister = async (req, res, next) => {
                       employee.technicalSkills.push(skillsExist._id);
                       await employee.save();
 
-                      // if (i === technicalSkills.length - 1) {
-                      //   res.status(200).json({
-                      //     error: false,
-                      //     message: "Employee Registration Successfull",
-                      //     data: employee,
-                      //     empAddressData,
-                      //     empEducationData,
-                      //   });
-                      // }
+                      
                     } else {
-                      res.status(409).json({
+                      res.json({
                         error: true,
                         message: "Employee id did not found to add skills",
                         data: null,
@@ -686,17 +669,9 @@ const employeeRegister = async (req, res, next) => {
                       employee.technicalSkills.push(skillData._id);
                       await employee.save();
 
-                      // if (i === technicalSkills.length - 1) {
-                      //   res.status(200).json({
-                      //     error: false,
-                      //     message: "Employee Registraion Successfull",
-                      //     data: employee,
-                      //     empAddressData,
-                      //     empEducationData,
-                      //   });
-                      // }
+                      
                     } else {
-                      res.status(409).json({
+                      res.json({
                         error: true,
                         message: "Employee id did not found to add skills",
                         data: null,
@@ -729,17 +704,9 @@ const employeeRegister = async (req, res, next) => {
                   if (emp) {
                     emp.experiance.push(expData._id);
                     await emp.save();
-                    // if (i === experiance.length - 1) {
-                    //   res.status(200).json({
-                    //     error: false,
-                    //     message: "Employee Registraion Successfull",
-                    //     data: emp,
-                    //     empAddressData,
-                    //     empEducationData,
-                    //   });
-                    // }
+                    
                   } else {
-                    res.status(409).json({
+                    res.json({
                       error: true,
                       message: "Employee id did not found to add experiance",
                       data: null,
@@ -767,15 +734,15 @@ const employeeRegister = async (req, res, next) => {
                     emp.contact.push(contactData._id);
                     await emp.save();
                     if (i === contact.length - 1) {
-                      res.status(200).json({
+                      res.json({
                         error: false,
                         message:
-                          "Employee Registraion with contact Successfull",
+                          "Employee Registraion Successfull",
                         data: emp,
                       });
                     }
                   } else {
-                    res.status(409).json({
+                    res.json({
                       error: true,
                       message: "Employee id did not found to add contact",
                       data: null,
@@ -788,13 +755,7 @@ const employeeRegister = async (req, res, next) => {
             }
           }
 
-          // res.status(200).json({
-          //   error: false,
-          //   message: "Employee Registration successfull",
-          //   data:
-          //   empAddressData,
-          //   empEducationData,
-          // });
+          
         }
       });
     }
@@ -1044,7 +1005,7 @@ const employeeDelete = async (req, res, next) => {
     await addressModel.deleteOne({ empId });
     await experianceModel.deleteOne({ empId });
     await contactModel.deleteOne({ empId });
-
+    
     res.status(200).json({
       error: false,
       message: "Employee Deleted Successfull",

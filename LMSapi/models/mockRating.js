@@ -5,6 +5,10 @@ const mockSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.String,
     ref: "employeeDetails",
   },
+  batchId:{
+    type:mongoose.Schema.Types.String,
+    ref:"employeeDetails"
+  },
   mockType: {
     type: String,
     minlength: 1,
@@ -32,8 +36,8 @@ const mockSchema = new mongoose.Schema({
   feedback: {
     type: String,
     minlength: 4,
-    maxlength: 20,
-    required: true,
+    maxlength: 50,
+    required: true, 
   },
   detailedFeedback: {
     type: String,

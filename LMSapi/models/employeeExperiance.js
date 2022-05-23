@@ -25,7 +25,7 @@ const empExperiance = new mongoose.Schema({
     },
     eDesignation:{
         type:String,
-        minlength:4,
+        minlength:1,
         maxlength:200,
         required:true
     },
