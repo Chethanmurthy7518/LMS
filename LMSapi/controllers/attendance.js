@@ -10,6 +10,7 @@ const empAttendance = async (req, res, next) => {
     if (employeeData) {
       const attendance = new attendanceModel({
         empId: employeeData.empId,
+        batchId:employeeData.batchId,
         empName: employeeData.empName,
         session: {
           morning: session.morning,
@@ -53,7 +54,7 @@ const getAttendanceBasedOnEmpId = async (req, res, next) => {
 
   const { empId } = req.query;
   try {
-      const attendanceData = await attendanceModel.findOne({empId:empId})
+      const attendanceData = await attendanceModel.find({empId}).lean()
       if(attendanceData){
           res.status(200).json({
               error:false,
@@ -62,7 +63,7 @@ const getAttendanceBasedOnEmpId = async (req, res, next) => {
           })
       }
       else{
-          res.status(404).json({
+          res.json({
               error:true,
               message:"Attendance Data not availbale",
               data:null

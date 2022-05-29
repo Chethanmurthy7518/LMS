@@ -5,6 +5,10 @@ const attendanceSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.String,
     ref: "employeeDetails",
   },
+  batchId:{
+    type:mongoose.Schema.Types.String,
+    ref:"employeeDetails"
+  },
   empName: {
     type: mongoose.Schema.Types.String,
     ref: "employeeDetails",

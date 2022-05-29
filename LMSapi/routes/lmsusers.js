@@ -19,5 +19,6 @@ router.get('/allemployees',userController.getAllEmployees)
 router.get('/getemployeebyid',userController.getEmployeeDetailsBasedOnEmpId)
 router.get('/getskills',userController.getSkills)
 router.get('/getemployeebybatchid',userController.getEmployeeDetailsBasedOnBatchId)
+router.put('/editempstatus',userController.employeeStatusEdit)
 
 module.exports = router

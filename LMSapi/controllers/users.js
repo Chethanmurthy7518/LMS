@@ -343,7 +343,8 @@ const userLogin = async (req, res, next) => {
         });
       }
     } else if (mentorsData) {
-      const { mentorName, empId, emailId, role, passwordChanged,batchId } = mentorsData;
+      const { mentorName, empId, emailId, role, passwordChanged, batchId } =
+        mentorsData;
 
       //bcrypt comapre
       const isPasswordMatched = await bcrypt.compare(
@@ -377,8 +378,15 @@ const userLogin = async (req, res, next) => {
       }
     } else if (employeeData) {
       console.log(employeeData);
-      const { empName, empId, emailId, role, addressDetails, technicalSkills,passwordChanged } =
-        employeeData;
+      const {
+        empName,
+        empId,
+        emailId,
+        role,
+        addressDetails,
+        technicalSkills,
+        passwordChanged,
+      } = employeeData;
       const empStatus = await employeeDetailsModel.findOne({ empId: empId });
       console.log(empStatus);
       if (empStatus.approveStatus === "approve") {
@@ -568,8 +576,6 @@ const employeeRegister = async (req, res, next) => {
                   if (emp) {
                     emp.educationDetails.push(empEducationData._id);
                     await emp.save();
-
-                    
                   } else {
                     res.json({
                       error: true,
@@ -606,9 +612,6 @@ const employeeRegister = async (req, res, next) => {
                   if (emp) {
                     emp.addressDetails.push(empAddressData._id);
                     await emp.save();
-
-                    
-                    
                   } else {
                     res.json({
                       error: true,
@@ -639,8 +642,6 @@ const employeeRegister = async (req, res, next) => {
                     if (employee) {
                       employee.technicalSkills.push(skillsExist._id);
                       await employee.save();
-
-                      
                     } else {
                       res.json({
                         error: true,
@@ -668,8 +669,6 @@ const employeeRegister = async (req, res, next) => {
                     if (employee) {
                       employee.technicalSkills.push(skillData._id);
                       await employee.save();
-
-                      
                     } else {
                       res.json({
                         error: true,
@@ -704,7 +703,6 @@ const employeeRegister = async (req, res, next) => {
                   if (emp) {
                     emp.experiance.push(expData._id);
                     await emp.save();
-                    
                   } else {
                     res.json({
                       error: true,
@@ -736,8 +734,7 @@ const employeeRegister = async (req, res, next) => {
                     if (i === contact.length - 1) {
                       res.json({
                         error: false,
-                        message:
-                          "Employee Registraion Successfull",
+                        message: "Employee Registraion Successfull",
                         data: emp,
                       });
                     }
@@ -754,8 +751,6 @@ const employeeRegister = async (req, res, next) => {
               next(err);
             }
           }
-
-          
         }
       });
     }
@@ -1005,7 +1000,7 @@ const employeeDelete = async (req, res, next) => {
     await addressModel.deleteOne({ empId });
     await experianceModel.deleteOne({ empId });
     await contactModel.deleteOne({ empId });
-    
+
     res.status(200).json({
       error: false,
       message: "Employee Deleted Successfull",
@@ -1032,7 +1027,7 @@ const employeeRegisterApprove = async (req, res, next) => {
         },
         {
           $set: {
-            approveStatus:'approve',
+            approveStatus: "approve",
             batchName: batch.batchName,
             batchId: batch.batchId,
           },
@@ -1084,7 +1079,7 @@ const employeeRegisterReject = async (req, res, next) => {
       },
       {
         $set: {
-          approveStatus:'reject'
+          approveStatus: "reject",
         },
       }
     );
@@ -1092,7 +1087,7 @@ const employeeRegisterReject = async (req, res, next) => {
     const empr = new empRejectModel({
       empId,
       empName: employeeData.empName,
-      approveStatus:'reject',
+      approveStatus: "reject",
       reason,
     });
     const employeeRejectData = await empr.save();
@@ -1165,25 +1160,58 @@ const getEmployeeDetailsBasedOnBatchId = async (req, res, next) => {
       .populate(["educationDetails", "addressDetails", "experiance", "contact"])
       .populate("technicalSkills", "skill")
       .lean();
-    if(employeeData){
+    if (employeeData) {
       res.status(200).json({
         error: false,
         message: "Employee Getting Successfull",
         data: employeeData,
       });
-    }
-    else{
+    } else {
       res.json({
-        error:true,
-        message:"Employees did not Found on Batch",
-        data:null
-      })
+        error: true,
+        message: "Employees did not Found on Batch",
+        data: null,
+      });
     }
   } catch (err) {
     next(err);
   }
 };
-
+const employeeStatusEdit = async (req, res, next) => {
+  console.log(req.body);
+  try {
+    const { empId, empStatus } = req.body;
+    const employeeData = await employeeDetailsModel.findOne({ empId: empId });
+    if (employeeData) {
+      await employeeDetailsModel.updateOne(
+        {
+        empId: empId,
+      },
+      {
+        empStatus:empStatus
+      }
+      );
+      res.json(
+        {
+          error:false,
+          message:"Employee Status Updated",
+          data:{
+            empId,
+            empStatus
+          }
+        }
+      )
+    } else {
+      res.json({
+        error: true,
+        message: "EmployeeData did not found",
+        data: null,
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
 module.exports = {
   userLogin,
   mentorRegister,
@@ -1199,5 +1227,5 @@ module.exports = {
   getEmployeeDetailsBasedOnEmpId,
   getEmployeeDetailsBasedOnBatchId,
   getSkills,
+  employeeStatusEdit,
 };
-

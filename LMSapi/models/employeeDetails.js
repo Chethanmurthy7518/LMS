@@ -114,7 +114,7 @@ const empDetailsSchema = new mongoose.Schema({
   },
   bankName: {
     type: String,
-    minlength: 5,
+    minlength: 2,
     maxlength: 50,
     required: true,
   },

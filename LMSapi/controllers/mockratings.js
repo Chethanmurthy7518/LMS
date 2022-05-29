@@ -2,6 +2,8 @@ const mockModel = require("../models/mockRating.js");
 const technologyModel = require("../models/technologies.js");
 const employeeModel = require("../models/employeeDetails.js");
 const createMockModel = require("../models/mockCreate.js");
+const attendanceModel = require("../models/employeeAttendance.js");
+
 const createMock = async (req, res, next) => {
   console.log(req.body);
   const { mockNo, technologies, panel, dateTime } = req.body;
@@ -37,26 +39,29 @@ const createMock = async (req, res, next) => {
         });
         if (technologyExist) {
           try {
-            createMockModel.findOne({ _id: createMockData._id }, async (err, mockid) => {
-              if (mockid) {
-                mockid.technologies.push(technologyExist._id);
-                await mockid.save();
+            createMockModel.findOne(
+              { _id: createMockData._id },
+              async (err, mockid) => {
+                if (mockid) {
+                  mockid.technologies.push(technologyExist._id);
+                  await mockid.save();
 
-                if (i === technologies.length - 1) {
-                  res.status(200).json({
-                    error: false,
-                    message: "Mock Created Successfull",
-                    data: createMockData,
+                  if (i === technologies.length - 1) {
+                    res.status(200).json({
+                      error: false,
+                      message: "Mock Created Successfull",
+                      data: createMockData,
+                    });
+                  }
+                } else {
+                  res.status(409).json({
+                    error: true,
+                    message: "Mock id did not found",
+                    data: null,
                   });
                 }
-              } else {
-                res.status(409).json({
-                  error: true,
-                  message: "Mock id did not found",
-                  data: null,
-                });
               }
-            });
+            );
           } catch (err) {
             next(err);
           }
@@ -66,32 +71,34 @@ const createMock = async (req, res, next) => {
           });
           try {
             const technologyData = await technology.save();
-            createMockModel.findOne({ _id: createMockData._id }, async (err, mockid) => {
-              if (mockid) {
-                mockid.technologies.push(technologyData._id);
-                await mockid.save();
+            createMockModel.findOne(
+              { _id: createMockData._id },
+              async (err, mockid) => {
+                if (mockid) {
+                  mockid.technologies.push(technologyData._id);
+                  await mockid.save();
 
-                if (i === technologies.length - 1) {
-                  res.status(200).json({
-                    error: false,
-                    message: "Mock Created Successfull",
-                    data: createMockData,
+                  if (i === technologies.length - 1) {
+                    res.status(200).json({
+                      error: false,
+                      message: "Mock Created Successfull",
+                      data: createMockData,
+                    });
+                  }
+                } else {
+                  res.status(409).json({
+                    error: true,
+                    message: "mock Id did not found",
+                    data: null,
                   });
                 }
-              } else {
-                res.status(409).json({
-                  error: true,
-                  message: "mock Id did not found",
-                  data: null,
-                });
               }
-            });
+            );
           } catch (err) {
             next(err);
           }
         }
       }
-
     }
   } catch (err) {
     next(err);
@@ -148,7 +155,7 @@ const mockRating = async (req, res, next) => {
         console.log("tech", techData);
         const mock = new mockModel({
           empId,
-          batchId:employeeExist.batchId,
+          batchId: employeeExist.batchId,
           mockType,
           mockTakenBy,
           technology: techData._id,
@@ -168,7 +175,7 @@ const mockRating = async (req, res, next) => {
       } else {
         const mock = new mockModel({
           empId,
-          batchId:employeeExist.batchId,
+          batchId: employeeExist.batchId,
           mockType,
           mockTakenBy,
           technology: technologyExist._id,
@@ -221,7 +228,7 @@ const getMockDetailsBasedOnEmployee = async (req, res, next) => {
   const { empId } = req.query;
   try {
     const mockdata = await mockModel
-      .findOne({ empId: empId })
+      .find({ empId})
       .populate("technology", "technologyName")
       .lean();
     if (mockdata) {
@@ -242,28 +249,55 @@ const getMockDetailsBasedOnEmployee = async (req, res, next) => {
   }
 };
 
-const getEmployeeWithMockDataWithBatchId = async (req,res,next)=>{
+const getEmployeeWithMockDataWithBatchId = async (req, res, next) => {
   console.log(req.query);
-  const {batchId} = req.query
-  try{
-     const EmployeeData = await employeeModel.find({batchId}).lean()
-     console.log("Employees",EmployeeData);
-     const mockData = await mockModel.find({batchId}).lean()
-     console.log(EmployeeData);
-      // console.log("EmpId",empId);
-     res.json({
-       error:false,
-       message:"Employee Data with MockRating",
-       data:{
+  const { batchId } = req.query;
+  try {
+    const EmployeeData = await employeeModel.find({ batchId }).lean();
+    //  console.log("Employees",EmployeeData);
+    const mockData = await mockModel
+      .find({ batchId })
+      .populate("technology", "technologyName")
+      .lean();
+    //  console.log(EmployeeData);
+    // console.log("EmpId",empId);
+    const attendanceData = await attendanceModel.find({batchId}).lean()
+    res.json({
+      error: false,
+      message: "Employee Data with MockRating",
+      data: {
         EmployeeData,
-        mockData
-       }
-     })
+        mockData,
+        attendanceData
+      },
+    });
+  } catch (err) {
+    next(err);
   }
-  catch(err){
-    next(err)
+};
+
+const getEmployeeMockDetailsByBatchId = async (req, res, next) => {
+  console.log(req.query);
+  const { batchId } = req.query;
+  try {
+    const mockData = await mockModel.find({ batchId }).lean();
+    if (mockData) {
+      res.status(200).json({
+        error: false,
+        message: "Employees Mock Deatils of the Batch",
+        data: mockData,
+      });
+    } else {
+      res.json({
+        error: true,
+        message: "MockDetails Did not found",
+        data: null,
+      });
+    }
+  } catch (err) {
+    next(err);
   }
-}
+};
 module.exports = {
   createMock,
   getCreatedMock,
@@ -271,4 +305,5 @@ module.exports = {
   getAllMockDetails,
   getMockDetailsBasedOnEmployee,
   getEmployeeWithMockDataWithBatchId,
+  getEmployeeMockDetailsByBatchId,
 };
