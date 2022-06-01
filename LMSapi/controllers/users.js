@@ -415,7 +415,7 @@ const userLogin = async (req, res, next) => {
             },
           });
         } else {
-          res.status(403).json({
+          res.json({
             error: true,
             message: "Password Incorrect",
             data: null,
@@ -1139,7 +1139,7 @@ const getEmployeeDetailsBasedOnEmpId = async (req, res, next) => {
     const employeeData = await employeeDetailsModel
       .findOne({ empId: empId })
       .populate(["educationDetails", "addressDetails", "experiance", "contact"])
-      .populate("technicalSkills", "skill")
+      .populate("technicalSkills")
       .lean();
     res.status(200).json({
       error: false,
